@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Пользователи, за которыми вы следите{% endblock %}
+{% block content %}
+{% load cache %}
+{% cache 20 index_page %}
+<h1>Последние посты пользователей, за которыми вы следите</h1>
+  {% include 'posts/includes/switcher.html' %}
+  {% for post in page_obj %}
+    {% include 'posts/includes/post.html' %}
+  {% if post.group %}
+    <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a>
+  {% else %}
+    Пост без группы
+  {% endif %}
+  {% if not forloop.last %}
+    <hr>
+  {% endif %}
+  {% endfor %}
+{% include 'posts/includes/paginator.html' %}
+{% endcache %}
+{% endblock %}
