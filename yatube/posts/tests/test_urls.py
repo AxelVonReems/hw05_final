@@ -38,7 +38,6 @@ class PostsURLTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-# Проверка страниц, для которых не требуется авторизация
     def test_public_urls_exist(self):
         """
         Публичные страницы доступны любому неавторизированному пользователю.
@@ -55,7 +54,6 @@ class PostsURLTests(TestCase):
         response = self.guest_client.get('/posts/unexisting_page')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
-# Проверка страниц, для которых требуется авторизация
     def test_private_urls_exist(self):
         """
         Персональные страницы доступны только авторизированным пользователям.
@@ -65,7 +63,6 @@ class PostsURLTests(TestCase):
                 response = self.authorized_client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
-# Проверка вызываемых шаблонов
     def test_public_urls_uses_correct_template(self):
         """Публичные URL-адреса используют соответствующие шаблоны."""
         for url, template in self.public_urls:

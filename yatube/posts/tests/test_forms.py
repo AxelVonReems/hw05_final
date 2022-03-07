@@ -7,7 +7,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from posts.forms import PostForm
 from posts.models import Comment, Group, Post
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -44,7 +43,6 @@ class PostFormTests(TestCase):
             text='Тестовый пост',
             image=cls.uploaded,
         )
-        cls.form = PostForm()
 
     @classmethod
     def tearDownClass(cls):
@@ -52,12 +50,10 @@ class PostFormTests(TestCase):
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
-        self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.slug = self.group.slug
 
-# Проверка возможности создания поста авторизированным пользователем
     def test_create_post_authorized(self):
         """Авторизованный пользователь может создать пост"""
         posts_count = Post.objects.count()
@@ -80,12 +76,12 @@ class PostFormTests(TestCase):
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertEqual(post.author, self.user)
         self.assertEqual(post.group, self.group)
-        self.assertEqual(post.text, 'Тестовый пост')
+        self.assertEqual(post.text, form_data['text'])
         self.assertTrue(Post.objects.filter(image='posts/small.gif').exists())
 
-# Проверка возможности создания поста неавторизированным пользователем
     def test_create_post_unauthorized(self):
         """Неавторизованный пользователь не может создать пост"""
+        self.guest_client = Client()
         posts_count = Post.objects.count()
         form_data = {
             'text': 'Тестовый пост',
@@ -100,7 +96,6 @@ class PostFormTests(TestCase):
         self.assertRedirects(response, '/auth/login/?next=/create/')
         self.assertEqual(Post.objects.count(), posts_count)
 
-# Проверка возможности редактирования поста авторизированным пользователем
     def test_edit_post(self):
         """При редактировании поста происходит его изменение в БД"""
         posts_count = Post.objects.count()
@@ -126,15 +121,15 @@ class PostFormTests(TestCase):
         )
         self.assertEqual(Post.objects.count(), posts_count)
         self.assertTrue(
-            Post.objects.filter(text='Отредактированный пост').exists()
+            Post.objects.filter(text=form_data['text']).exists()
         )
         self.assertNotEqual(post.group, group)
 
-# Проверка возможности создания комментария авторизированным пользователем
     def test_comment_authorized(self):
         """Авторизованный пользователь может добавить комментарий"""
         comment = Comment.objects.create(
             author=self.user,
+            post=self.post,
             text='Тестовый комментарий',
         )
         comment_count = Comment.objects.count()
@@ -152,4 +147,6 @@ class PostFormTests(TestCase):
             reverse('posts:post_detail', kwargs={'post_id': self.post.id})
         )
         self.assertEqual(Comment.objects.count(), comment_count + 1)
-        self.assertEqual(comment.text, 'Тестовый комментарий')
+        self.assertEqual(comment.text, form_data['text'])
+        self.assertIsNotNone(comment.post)
+        # self.assertEqual(comment.post, self.post) так тоже можно проверить?

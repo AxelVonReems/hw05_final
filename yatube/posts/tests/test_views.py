@@ -5,10 +5,10 @@ from django.urls import reverse
 from django import forms
 
 from posts.models import Follow, Group, Post
+from posts.views import MAX_POSTS
 
 User = get_user_model()
 
-POSTS_ON_1ST_PAGE = 10
 POSTS_ON_2ND_PAGE = 3
 
 
@@ -57,7 +57,6 @@ class PostsViewsTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-# Проверка используемых шаблонов
     def test_public_pages_use_correct_template(self):
         """
         URL-адрес использует соответствующий шаблон на публичных страницах.
@@ -75,7 +74,6 @@ class PostsViewsTests(TestCase):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 
-# Проверка передаваемого контекста
     def test_public_pages_context(self):
         """Шаблоны index, group_post, post_detail и profile
         получают правильный context"""
@@ -116,7 +114,6 @@ class PostsViewsTests(TestCase):
         self.form_asserts(post_object)
 
 
-# Проверка пагинации
 class PaginatorViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -132,7 +129,7 @@ class PaginatorViewsTest(TestCase):
             text=f'Тестовый пост {i}',
             group=cls.group,
         )
-            for i in range(POSTS_ON_1ST_PAGE + POSTS_ON_2ND_PAGE)
+            for i in range(MAX_POSTS + POSTS_ON_2ND_PAGE)
         ])
         cls.pagination_urls = (
             (reverse('posts:index')),
@@ -144,7 +141,7 @@ class PaginatorViewsTest(TestCase):
     def test_pagination(self):
         """Паджинация корректно работает на всех страницах"""
         pages = (
-            (1, POSTS_ON_1ST_PAGE),
+            (1, MAX_POSTS),
             (2, POSTS_ON_2ND_PAGE),
         )
         for page, count in pages:
@@ -156,7 +153,6 @@ class PaginatorViewsTest(TestCase):
                     )
 
 
-# Проверка работы кеширования
 class TestCache(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -195,7 +191,6 @@ class TestCache(TestCase):
         self.assertTrue(request_1 != request_3)
 
 
-# Проверка работы подписок на пользователей
 class TestFollow(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -215,13 +210,10 @@ class TestFollow(TestCase):
         )
 
     def setUp(self):
-        # Автор поста
         self.author_client = Client()
         self.author_client.force_login(self.author)
-        # Пользователь, подписанный на автора
         self.authorized_client_1 = Client()
         self.authorized_client_1.force_login(self.user_1)
-        # Пользователь, не подписанный на автора
         self.authorized_client_2 = Client()
         self.authorized_client_2.force_login(self.user_2)
 

@@ -16,7 +16,6 @@ class PostModelTest(TestCase):
             text='Длинныцй и красивый тестовый пост',
         )
 
-# Проверка функции __str__ в моделях Group и Post
     def test_post_have_correct_object_name(self):
         """Проверяем, что у модели Post корректно работает __str__."""
         expected_post_name = self.post.text[:15]
@@ -32,7 +31,6 @@ class PostModelTest(TestCase):
         expected_group_name = group.title
         self.assertEqual(expected_group_name, str(group))
 
-# Проверка verbose name в полях формы
     def test_verbose_name(self):
         """verbose_name в полях совпадает с ожидаемым."""
         field_verboses = {
@@ -46,7 +44,6 @@ class PostModelTest(TestCase):
                     self.post._meta.get_field(value).verbose_name, expected
                 )
 
-# Проверка help text name в полях формы
     def test_help_text(self):
         """help_text в полях совпадает с ожидаемым."""
         field_help_texts = {
