@@ -149,4 +149,3 @@ class PostFormTests(TestCase):
         self.assertEqual(Comment.objects.count(), comment_count + 1)
         self.assertEqual(comment.text, form_data['text'])
         self.assertIsNotNone(comment.post)
-        # self.assertEqual(comment.post, self.post) так тоже можно проверить?

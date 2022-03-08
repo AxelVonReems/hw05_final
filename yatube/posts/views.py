@@ -19,7 +19,7 @@ def index(request):
     page_obj = paginator.get_page(page_number)
     context = {
         'page_obj': page_obj,
-        'follow': True
+        'index': True
     }
     return render(request, 'posts/index.html', context)
 
@@ -129,7 +129,7 @@ def follow_index(request):
     page_obj = paginator.get_page(page_number)
     context = {
         'page_obj': page_obj,
-        'index': True
+        'follow': True
     }
     return render(request, 'posts/follow.html', context)
 
@@ -148,11 +148,5 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    # if request.user == author:
-    #    return redirect('posts:profile', username=username)
-    # Я так понимаю, что раз автор не может на себя подписаться, то и
-    # отписаться не сможет. Значит эта проверка не имеет смысла и ее
-    # можно убрать. Или можно проверить как в profile_follow, но я не вижу в
-    # этом особого смысла, раз автор и так не может быть на себя подписан
     Follow.objects.filter(user=request.user, author=author).delete()
     return redirect('posts:profile', username=username)
